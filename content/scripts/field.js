@@ -1,3 +1,13 @@
+//Y reference points
+//going off of http://ostma.org/images/pdf-files/layout-high-school-football.pdf
+//steps/hash = ((53+(4/12))/3)*(8/5) = 256/9 or 28.44444...
+var FSL = 0;
+var FH = 256/9;
+var BH = (256/9)*2;
+var BSL = (256/9)*3;
+
+
+
 //x in the form
 //side (side): (steps) (in/out) from (yardline)
 
@@ -38,21 +48,18 @@ function setFromXY(x, y) {
     var referenceLine = y.split(" ")[2].trim();
     var referenceY = 0;
     
-    //going off of http://ostma.org/images/pdf-files/layout-high-school-football.pdf
-    //steps/hash = ((53+(4/12))/3)*(8/5) = 256/9 or 28.44444...
     switch(referenceLine) {
         case "FSL":
-            referenceY = 0;
+            referenceY = FSL;
         break;
         case "FH":
-            referenceY = (256/9);
+            referenceY = FH;
         break;
-        //I don't actually know anything past the FH
-        case"BH":
-            referenceY = (256/9)*2;
+        case "BH":
+            referenceY = BH;
         break;
         case "BSL":
-            referenceY = (256/9)*3;
+            referenceY = BSL;
         break;
     }
     
@@ -69,3 +76,71 @@ function setFromXY(x, y) {
     this.x = actualX;
     this.y = actualY;
 };
+
+//set should be an object with x and y properties
+function prettifySet(set) {
+    var x = set.x;
+    var y = set.y;
+    
+    var referenceY = "FSL";
+    if(set.y >= (FH / 2) && set.y <= ((FH + BH) / 2)) {
+        referenceY = "FH";
+        y = set.y - FH;
+    }
+    else if (set.y >= ((FH + BH) / 2) && set.y <= ((BH + BSL) / 2)) {
+        referenceY = "BH";
+        y = set.y - BH;
+    }
+    else if(set.y >= ((BH + BSL) / 2)) {
+        referenceY = "BSL";
+        y = set.y - BSL;
+    }
+    var prettyY = Math.abs(y) + " steps " + (y < 0 ? "in front" : "behind") + " of the " + referenceY;
+    
+    var referenceX = 0;
+    var distanceFromX = 0;
+    //get the X coord=
+    for(i = -80; i <= 80; (i += 8)) {
+        distanceFromX = Math.abs(Math.abs(set.x) - Math.abs(i));
+        if(distanceFromX <= 4) {
+            referenceX = i;
+            break;
+        }
+    }
+    
+    var side = (i < 0) ? 1 : 2;
+    var direction = "";
+    
+    if (x == referenceX) {
+        direction = "on";
+    }
+    else if (side == 1) {
+        if(x < referenceX) {
+            direction = "outside";
+        }
+        else if (x > referenceX) {
+            direction = "inside";
+        }
+    }
+    else if (side == 2) {
+        if(x < referenceX) {
+            direction = "inside";
+        }
+        else if (x > referenceX) {
+            direction = "outside";
+        }
+    }
+    
+    var yardLine = (50 - (Math.abs(referenceX) * (5/8)));
+    
+    var prettyX = "Side " + side + ": " + distanceFromX + " steps " + direction + " the " + yardLine;
+    
+    return { "prettyX": prettyX, "prettyY": prettyY };
+}
+
+setFromXY.prototype.findHalfSet = function(otherSet) {
+    var halfX = (otherSet.x + this.x) / 2;
+    var halfY = (otherSet.y + this.y) / 2;
+    
+    return { x: halfX, y: halfY };
+}

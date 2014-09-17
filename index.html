@@ -5,7 +5,9 @@
         <script type="text/javascript" src="content/scripts/field.js"></script>
     </head>
     <body>
+        <!-- ex. side 1: 0 in from 45 -->
         <input type="text" placeholder="X steps" id="xsteps" />
+        <!-- ex. 0 behind FSL -->
         <input type="text" placeholder="Y steps" id="ysteps" />
         
         <br/><br/><br/>
@@ -20,7 +22,12 @@
             
             calcBtn.onclick = function () {
                 var firstSet = new setFromXY(document.getElementById("xsteps").value, document.getElementById("ysteps").value);
-                //var secondSet = setFromXY(document.getElementById("xsteps2").value, document.getElementById("ysteps2").value);
+                var secondSet = new setFromXY(document.getElementById("xsteps2").value, document.getElementById("ysteps2").value);
+                
+                var halfSet = firstSet.findHalfSet(secondSet);
+                var prettyHalf = prettifySet(halfSet);
+                alert(prettyHalf.prettyX);
+                alert(prettyHalf.prettyY);
             };
         </script>
     </body>
