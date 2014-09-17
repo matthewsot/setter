@@ -10,7 +10,7 @@ function setFromXY(x, y) {
     var referenceX = ((50 - reference) * 8) * (side == 1 ? -1 : 1);
     var actualX;
     
-    //get the difference
+    //get the person's actual dot X coord
     if(side == 1) {
         if(direction == "in") {
             actualX = referenceX + steps;
@@ -19,4 +19,14 @@ function setFromXY(x, y) {
             actualX = referenceX - steps;
         }
     }
+    else if(side == 2) {
+        if (direction == "in") {
+            actualX = referenceX - steps;
+        }
+        else if (direction == "out") {
+            actualX = referenceX + steps;
+        }
+    }
+    
+    
 }
