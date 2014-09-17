@@ -7,13 +7,20 @@
     <body>
         <input type="text" placeholder="X steps" id="xsteps" />
         <input type="text" placeholder="Y steps" id="ysteps" />
+        
+        <br/><br/><br/>
+        
+        <input type="text" placeholder="X steps" id="xsteps2" />
+        <input type="text" placeholder="Y steps" id="ysteps2" />
+        
         <button id="calc-btn">Calculate</button>
         
         <script type="text/javascript">
             var calcBtn = document.getElementById("calc-btn");
             
             calcBtn.onclick = function () {
-                
+                var firstSet = setFromXY(document.getElementById("xsteps").value, document.getElementById("ysteps").value);
+                var secondSet = setFromXY(document.getElementById("xsteps2").value, document.getElementById("ysteps2").value);
             };
         </script>
     </body>
