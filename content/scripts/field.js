@@ -18,7 +18,7 @@ function Dot(x, y) {
 };
 
 Dot.prototype.getReferenceY = function () {
-    //assumes FSL -> FH === FH -> BH, etc.
+    //assumes FH - FSL === BH - FH, etc.
 
     switch (Math.floor(this.y / (referencePoints["FH"] / 2))) {
         case 0:
