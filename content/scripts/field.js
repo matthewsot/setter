@@ -1,10 +1,12 @@
 //Y reference points
 //going off of http://ostma.org/images/pdf-files/layout-high-school-football.pdf
 //steps/hash = ((53+(4/12))/3)*(8/5) = 256/9 or 28.44444...
-var FSL = 0;
-var FH = 256/9;
-var BH = (256/9)*2;
-var BSL = (256 / 9) * 3;
+var referencePoints = {
+    "FSL": 0,
+    "FH": 256 / 9,
+    "BH": (256 / 9) * 2,
+    "BSL": (256 / 9) * 3
+};
 
 function yardlineToSteps(side, yardline) {
     return ((50 - yardline) * (8 / 5)) * (side === 1 ? -1 : 1);
@@ -16,25 +18,27 @@ function Dot(x, y) {
 };
 
 Dot.prototype.getReferenceY = function () {
-    //assuming FSL -> FH === FH -> BH, etc.
-    
+    //assumes FSL -> FH === FH -> BH, etc.
+
+    switch (Math.floor(this.y / (referencePoints["FH"] / 2))) {
+        case 0:
+            return "FSL";
+        case 1:
+        case 2:
+            return "FH";
+        case 3:
+        case 4:
+            return "BH";
+        case 5:
+        case 6:
+            return "BSL";
+    }
 };
 
 Dot.prototype.prettify = function () {    
-    var referenceY = "FSL";
-    if(this.y >= (FH / 2) && this.y <= ((FH + BH) / 2)) {
-        referenceY = "FH";
-        y = this.y - FH;
-    }
-    else if (this.y >= ((FH + BH) / 2) && this.y <= ((BH + BSL) / 2)) {
-        referenceY = "BH";
-        y = this.y - BH;
-    }
-    else if (this.y >= ((BH + BSL) / 2)) {
-        referenceY = "BSL";
-        y = this.y - BSL;
-    }
-    var prettyY = Math.abs(this.y) + " steps " + (this.y < 0 ? "in front of" : "behind") + " the " + referenceY;
+    var referenceY = this.getReferenceY();
+    var y = this.y - referencePoints[referenceY];
+    var prettyY = Math.abs(y) + " steps " + (this.y < 0 ? "in front of" : "behind") + " the " + referenceY;
     
     var referenceX = 0;
     var distanceFromX = 0;
@@ -108,26 +112,11 @@ parseDot._parseX = function (x) {
 
 //S(1|2) (steps)(I|O)(yardline)
 parseDot._parseY = function (y) {
-    var referenceLine = y.substring(y.match(/^(\d|\.)*(B|IFO)/).length + 1, y.length);
-    var reference = 0;
-    switch(referenceLine) {
-        case "FSL":
-            reference = FSL;
-        break;
-        case "FH":
-            reference = FH;
-        break;
-        case "BH":
-            reference = BH;
-        break;
-        case "BSL":
-            reference = BSL;
-        break;
-    }
+    var referenceLine = y.substring(y.match(/^(\d|\.)*(B|IFO)/).length, y.length);
 
     return {
         steps: parseFloat(y.match(/^(\d|\.)*/)),
         direction: /^(\d|\.)*B/.test(y) ? "behind" : "in front of",
-        reference: reference
+        reference: referencePoints[referenceLine]
     };
 };
