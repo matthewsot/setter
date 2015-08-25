@@ -4,143 +4,130 @@
 var FSL = 0;
 var FH = 256/9;
 var BH = (256/9)*2;
-var BSL = (256/9)*3;
+var BSL = (256 / 9) * 3;
 
+function yardlineToSteps(side, yardline) {
+    return ((50 - yardline) * (8 / 5)) * (side === 1 ? -1 : 1);
+}
 
-
-//x in the form
-//side (side): (steps) (in/out) from (yardline)
-
-//y in the form
-//(steps) (behind/infront) (FSL/FH/BH/BSL)
-function setFromXY(x, y) {
-    //parse X
-    var side = parseFloat(x.split("side")[1].split(":")[0].trim());
-    var steps = parseFloat(x.split(":")[1].trim().split(" ")[0].trim());
-    var direction = x.split("from")[0].split(":")[1].trim().split(" ")[1].trim();
-    var reference = parseFloat(x.split("from")[1].trim());
-    
-    //get the reference as an X value in 8 to 5 steps
-    var referenceX = ((50 - reference) * (8/5)) * (side == 1 ? -1 : 1);
-    var actualX;
-    
-    //get the person's actual dot X coord
-    if(side == 1) {
-        if(direction == "in") {
-            actualX = referenceX + steps;
-        }
-        else if (direction == "out") {
-            actualX = referenceX - steps;
-        }
-    }
-    else if(side == 2) {
-        if (direction == "in") {
-            actualX = referenceX - steps;
-        }
-        else if (direction == "out") {
-            actualX = referenceX + steps;
-        }
-    }
-    
-    //parses Y
-    var stepsY = parseFloat(y.split(" ")[0].trim());
-    var directionY = y.split(" ")[1].trim();
-    var referenceLine = y.split(" ")[2].trim();
-    var referenceY = 0;
-    
-    switch(referenceLine) {
-        case "FSL":
-            referenceY = FSL;
-        break;
-        case "FH":
-            referenceY = FH;
-        break;
-        case "BH":
-            referenceY = BH;
-        break;
-        case "BSL":
-            referenceY = BSL;
-        break;
-    }
-    
-    var actualY;
-    
-    //get the actual Y coord
-    if(directionY == "behind") {
-        actualY = referenceY + stepsY;
-    }
-    else if (directionY == "infront") {
-        actualY = referenceY - stepsY;
-    }
-    
-    this.x = actualX;
-    this.y = actualY;
+function Dot(x, y) {
+    this.x = x;
+    this.y = y;
 };
 
-//set should be an object with x and y properties
-function prettifySet(set) {
-    var x = set.x;
-    var y = set.y;
+Dot.prototype.getReferenceY = function () {
+    //assuming FSL -> FH === FH -> BH, etc.
     
+};
+
+Dot.prototype.prettify = function () {    
     var referenceY = "FSL";
-    if(set.y >= (FH / 2) && set.y <= ((FH + BH) / 2)) {
+    if(this.y >= (FH / 2) && this.y <= ((FH + BH) / 2)) {
         referenceY = "FH";
-        y = set.y - FH;
+        y = this.y - FH;
     }
-    else if (set.y >= ((FH + BH) / 2) && set.y <= ((BH + BSL) / 2)) {
+    else if (this.y >= ((FH + BH) / 2) && this.y <= ((BH + BSL) / 2)) {
         referenceY = "BH";
-        y = set.y - BH;
+        y = this.y - BH;
     }
-    else if(set.y >= ((BH + BSL) / 2)) {
+    else if (this.y >= ((BH + BSL) / 2)) {
         referenceY = "BSL";
-        y = set.y - BSL;
+        y = this.y - BSL;
     }
-    var prettyY = Math.abs(y) + " steps " + (y < 0 ? "in front" : "behind") + " of the " + referenceY;
+    var prettyY = Math.abs(this.y) + " steps " + (this.y < 0 ? "in front of" : "behind") + " the " + referenceY;
     
     var referenceX = 0;
     var distanceFromX = 0;
-    //get the X coord=
-    for(i = -80; i <= 80; (i += 8)) {
-        distanceFromX = Math.abs(Math.abs(set.x) - Math.abs(i));
-        if(distanceFromX <= 4) {
-            referenceX = i;
-            break;
-        }
-    }
+
+    var absX = Math.abs(this.x);
+    referenceX = Math.abs(Math.round(this.x / 8) * 8);
+    distanceFromX = Math.abs(absX - referenceX);
     
-    var side = (i < 0) ? 1 : 2;
+    var side = (referenceX < 0) ? 1 : 2;
     var direction = "";
     
-    if (x == referenceX) {
+    if (absX === referenceX) {
         direction = "on";
     }
-    else if (side == 1) {
-        if(x < referenceX) {
-            direction = "outside";
-        }
-        else if (x > referenceX) {
-            direction = "inside";
-        }
-    }
-    else if (side == 2) {
-        if(x < referenceX) {
-            direction = "inside";
-        }
-        else if (x > referenceX) {
-            direction = "outside";
-        }
+    else {
+        direction = absX < referenceX ? "inside" : "outside";
     }
     
-    var yardLine = (50 - (Math.abs(referenceX) * (5/8)));
+    var yardLine = 50 - (referenceX * (5/8));
     
     var prettyX = "Side " + side + ": " + distanceFromX + " steps " + direction + " the " + yardLine;
     
-    return { "prettyX": prettyX, "prettyY": prettyY };
-}
+    return { x: prettyX, y: prettyY };
+};
 
-setFromXY.prototype.findHalfSet = function(otherSet) {
-    var halfX = (otherSet.x + this.x) / 2;
-    var halfY = (otherSet.y + this.y) / 2;
-    
-    return { x: halfX, y: halfY };
-}
+Dot.average = function (a, b) {
+    return new Dot(((a.x + b.x) / 2), ((a.y + b.y) / 2));
+};
+
+var parseDot = function (x, y) {
+    var dot = new Dot(0, 0);
+
+    x = parseDot._parseX(x);
+    y = parseDot._parseY(y);
+
+    //get the person's actual dot X coord
+    if (x.side === 1) {
+        if (x.direction === "in") {
+            dot.x = x.reference + x.steps;
+        }
+        else if (x.direction === "out") {
+            dot.x = x.reference - x.steps;
+        }
+    }
+    else if (x.side === 2) {
+        if (x.direction === "in") {
+            dot.x = x.reference - x.steps;
+        }
+        else if (x.direction === "out") {
+            dot.x = x.reference + x.steps;
+        }
+    }
+
+    y.direction = y.direction === "behind" ? +1 : -1;
+    dot.y = y.reference + (y.direction * y.steps);
+
+    return dot;
+};
+
+//S(1|2) (steps)(I|O)(yardline)
+parseDot._parseX = function (x) {
+    var direction = x.split(' ')[1].indexOf("I") === -1 ? "O" : "I";
+    var side = parseInt(x[1]);
+    return {
+        side: side,
+        direction: direction === "I" ? "in" : "out",
+        steps: parseFloat(x.split(' ')[1].split(direction)[0]),
+        reference: yardlineToSteps(side, parseInt(x.split(direction)[1].trim()))
+    };
+};
+
+//S(1|2) (steps)(I|O)(yardline)
+parseDot._parseY = function (y) {
+    var referenceLine = y.substring(y.match(/^(\d|\.)*(B|IFO)/).length + 1, y.length);
+    var reference = 0;
+    switch(referenceLine) {
+        case "FSL":
+            reference = FSL;
+        break;
+        case "FH":
+            reference = FH;
+        break;
+        case "BH":
+            reference = BH;
+        break;
+        case "BSL":
+            reference = BSL;
+        break;
+    }
+
+    return {
+        steps: parseFloat(y.match(/^(\d|\.)*/)),
+        direction: /^(\d|\.)*B/.test(y) ? "behind" : "in front of",
+        reference: reference
+    };
+};

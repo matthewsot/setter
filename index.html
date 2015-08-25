@@ -21,13 +21,13 @@
             var calcBtn = document.getElementById("calc-btn");
             
             calcBtn.onclick = function () {
-                var firstSet = new setFromXY(document.getElementById("xsteps").value, document.getElementById("ysteps").value);
-                var secondSet = new setFromXY(document.getElementById("xsteps2").value, document.getElementById("ysteps2").value);
+                var firstSet = parseDot(document.getElementById("xsteps").value, document.getElementById("ysteps").value);
+                var secondSet = parseDot(document.getElementById("xsteps2").value, document.getElementById("ysteps2").value);
                 
-                var halfSet = firstSet.findHalfSet(secondSet);
-                var prettyHalf = prettifySet(halfSet);
-                alert(prettyHalf.prettyX);
-                alert(prettyHalf.prettyY);
+                var halfSet = Dot.average(firstSet, secondSet);
+                var prettyHalf = halfSet.prettify();
+                alert(prettyHalf.x);
+                alert(prettyHalf.y);
             };
         </script>
     </body>
