@@ -16,6 +16,7 @@
         <input type="text" placeholder="Y steps" id="ysteps2" />
         <br/><br/>
         <button id="calc-btn">Calculate</button>
+        <button id="next-btn">Next</button>
         
         <h3>Midset:</h3>
         <p id="midset-x"></p>
@@ -27,6 +28,7 @@
         
         <script type="text/javascript">
             var calcBtn = document.getElementById("calc-btn");
+            var nextBtn = document.getElementById("next-btn");
             
             var canvas = document.getElementById("triangle");
             var ctx = canvas.getContext("2d");
@@ -37,8 +39,6 @@
 
                 var halfSet = Dot.average(firstSet, secondSet);
                 var prettyHalf = halfSet.prettify();
-                alert(prettyHalf.x);
-                alert(prettyHalf.y);
                 document.getElementById("midset-x").textContent = prettyHalf.x;
                 document.getElementById("midset-y").textContent = prettyHalf.y;
 
@@ -84,6 +84,13 @@
                 ctx.fillText(diff.x, 75, 15);
                 document.getElementById("hyp").textContent = Math.sqrt(Math.pow(diff.x, 2) + Math.pow(diff.y, 2));
             };
+            
+            nextBtn.onclick = function () {
+                document.getElementById("xsteps").value = document.getElementById("xsteps2").value;
+                document.getElementById("ysteps").value = document.getElementById("ysteps2").value;
+                
+                document.getElementById("xsteps2").value = "";
+                document.getElementById("ysteps2").value = "";
             };
         </script>
     </body>
