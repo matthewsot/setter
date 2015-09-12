@@ -47,7 +47,7 @@ Dot.prototype.prettify = function () {
     referenceX = Math.abs(Math.round(this.x / 8) * 8);
     distanceFromX = Math.abs(absX - referenceX);
     
-    var side = (referenceX < 0) ? 1 : 2;
+    var side = (this.x < 0) ? 1 : 2;
     var direction = "";
     
     if (absX === referenceX) {
@@ -68,11 +68,19 @@ Dot.average = function (a, b) {
     return new Dot(((a.x + b.x) / 2), ((a.y + b.y) / 2));
 };
 
+Dot.difference = function (a, b) {
+    return {
+        x: a.x - b.x,
+        y: a.y - b.y
+    }
+}
+
 var parseDot = function (x, y) {
     var dot = new Dot(0, 0);
 
     x = parseDot._parseX(x);
     y = parseDot._parseY(y);
+    console.log(y);
 
     //get the person's actual dot X coord
     if (x.side === 1) {
@@ -110,9 +118,10 @@ parseDot._parseX = function (x) {
     };
 };
 
-//S(1|2) (steps)(I|O)(yardline)
+//(steps)(IFO/BH)(FH|FSL|etc)
 parseDot._parseY = function (y) {
-    var referenceLine = y.substring(y.match(/^(\d|\.)*(B|IFO)/).length, y.length);
+    var referenceLine = y.substring(y.match(/^(\d|\.)*(B|IFO)/)[0].length, y.length);
+    console.log(referenceLine);
 
     return {
         steps: parseFloat(y.match(/^(\d|\.)*/)),

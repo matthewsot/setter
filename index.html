@@ -10,24 +10,80 @@
         <!-- ex. 0 behind FSL -->
         <input type="text" placeholder="Y steps" id="ysteps" />
         
-        <br/><br/><br/>
+        <br/><br/>
         
         <input type="text" placeholder="X steps" id="xsteps2" />
         <input type="text" placeholder="Y steps" id="ysteps2" />
-        
+        <br/><br/>
         <button id="calc-btn">Calculate</button>
+        
+        <h3>Midset:</h3>
+        <p id="midset-x"></p>
+        <p id="midset-y"></p>
+        
+        <br/>
+        <p id="hyp"></p>
+        <canvas id="triangle"></canvas>
         
         <script type="text/javascript">
             var calcBtn = document.getElementById("calc-btn");
             
+            var canvas = document.getElementById("triangle");
+            var ctx = canvas.getContext("2d");
+            
             calcBtn.onclick = function () {
                 var firstSet = parseDot(document.getElementById("xsteps").value, document.getElementById("ysteps").value);
                 var secondSet = parseDot(document.getElementById("xsteps2").value, document.getElementById("ysteps2").value);
-                
+
                 var halfSet = Dot.average(firstSet, secondSet);
                 var prettyHalf = halfSet.prettify();
                 alert(prettyHalf.x);
                 alert(prettyHalf.y);
+                document.getElementById("midset-x").textContent = prettyHalf.x;
+                document.getElementById("midset-y").textContent = prettyHalf.y;
+
+                var diff = Dot.difference(secondSet, firstSet);
+                var scale = 10;
+                var offset = 30;
+
+                console.log(diff);
+                
+                ctx.clearRect(0, 0, 500, 500);
+
+                var path = new Path2D();
+                path.moveTo(offset, offset);
+                if (diff.x < 0) {
+                    if (diff.y < 0) {
+                        path.moveTo(offset, offset + (diff.y * -1 * scale));
+                        path.lineTo(offset + (diff.x * -1 * scale), offset + (diff.y * -1 * scale));
+                        path.lineTo(offset + (diff.x * -1 * scale), offset);
+                    }
+                    if (diff.y > 0) {
+                        path.moveTo(offset, offset);
+                        path.lineTo(offset, offset + (diff.y * scale));
+                        path.lineTo(offset + (diff.x * -1 * scale), offset + (diff.y * scale));
+                    }
+                }
+                if (diff.x > 0) {
+                    if (diff.y < 0) {
+                        path.moveTo(offset, offset);
+                        path.lineTo(offset + (diff.x * scale), offset);
+                        path.lineTo(offset + (diff.x * scale), offset + (diff.y * -1 * scale));
+                    }
+                    if (diff.y > 0) {
+                        path.moveTo(offset + (diff.x * scale), offset);
+                        path.lineTo(offset + (diff.x * scale), offset + (diff.y * scale));
+                        path.lineTo(offset, offset + (diff.y * scale));
+                    }
+                }
+                ctx.fill(path);
+
+                ctx.textBaseline = "top";
+                ctx.font = "10px sans-serif";
+                ctx.fillText(diff.y, 0, 50);
+                ctx.fillText(diff.x, 75, 15);
+                document.getElementById("hyp").textContent = Math.sqrt(Math.pow(diff.x, 2) + Math.pow(diff.y, 2));
+            };
             };
         </script>
     </body>
