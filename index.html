@@ -107,6 +107,7 @@
                 var prettyHalf = halfSet.prettify();
                 document.getElementById("midset-x").textContent = prettyHalf.x;
                 document.getElementById("midset-y").textContent = prettyHalf.y;
+                drawTriangle(firstSet, secondSet);
             };
             
             nextBtn.onclick = function () {
