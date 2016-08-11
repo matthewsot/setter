@@ -22,6 +22,12 @@
             var dotNumber;
             var accurate;
             
+            document.getElementById("dotnumber").onkeydown = function (e){
+                if (e.keyCode == 13) {
+                    goBtn.onclick();
+                }
+            }
+            
             function rewriteXDots(xDots) {
                 for (var i = 0; i < xDots.length; i++) {
                     xDots[i] = xDots[i].replace("side ", "S").replace(":", "").replace(" yd ln", "").replace("on 50", "S1 0I50");
