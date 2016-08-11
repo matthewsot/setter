@@ -30,9 +30,11 @@
             
             function rewriteXDots(xDots) {
                 for (var i = 0; i < xDots.length; i++) {
-                    xDots[i] = xDots[i].replace("side ", "S").replace(":", "").replace(" yd ln", "").replace("on 50", "S1 0I50");
+                    xDots[i] = xDots[i].replace("side ", "S").replace(":", "").replace(" yd ln", "").replace("on 50", "S1 0I50").replace("S1 S1", "S1").replace("S2 S", "S");
+                    console.log(xDots[i]);
                     if (xDots[i].indexOf("on ") != -1) {
                         xDots[i] = xDots[i].replace("on ", "0I");
+                        console.log(xDots[i]);
                     } else {
                         xDots[i] = xDots[i].replace("steps ", "").replace(" inside ", "I").replace(" outside of ", "O").replace(" outside ", "O");
                     }
