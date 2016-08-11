@@ -36,13 +36,10 @@
             
             function rewriteYDots(yDots) {
                 for (var i = 0; i < yDots.length; i++) {
-                    if (yDots[i].indexOf("on ") != -1) {
-                        yDots[i] = yDots[i].replace("on ", "0IFO");
-                    } else {
-                        yDots[i] = yDots[i].replace(" steps in front of ", "IFO").replace(" steps behind ", "B")
-                                        .replace("front hash ", "FH").replace("back hash ", "BH")
-                                        .replace("back side line", "BSL").replace("front side line", "FSL");
-                    }
+                    yDots[i] = yDots[i].replace("on ", "0IFO");
+                    yDots[i] = yDots[i].replace(" steps in front of ", "IFO").replace(" steps behind ", "B")
+                                    .replace("front hash ", "FH").replace("back hash ", "BH")
+                                    .replace("back side line", "BSL").replace("front side line", "FSL");
                     yDots[i] = yDots[i].replace("(hs)", "");
                 }
                 return yDots;
