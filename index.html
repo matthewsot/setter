@@ -3,120 +3,120 @@
     <head>
         <title>Setter</title>
         <script type="text/javascript" src="content/scripts/field.js"></script>
+        <script type="text/javascript" src="pdfjs/build/pdf.js"></script>
+        <script type="text/javascript" src="pdfjs/build/pdf.worker.js"></script>
     </head>
     <body>
-        <p>
-            <b>Format:</b>
-            <br/>
-            If your dot is Side 2: 4 inside the 45 and 3 behind the front hash, enter:
-            <br/>
-            "S2 4I45" for X and "3BFH" for Y
-            <br/>
-            In general the format is "S(side) (steps)(I|O)(yard line)" for X and "(steps)(B|IFO)(FSL|FH|BH|BSL)" for Y.
-            <br/>
-            Yes, that means that if you're "on the 40" you must either put 0I40 or 0O40 for now.
-            <br/><br/>
+        <input type="text" id="dotnumber" placeholder="Dot Number (Bt4)" />
+        <br/>
+        <input type="checkbox" id="accurate" name="accurate" /> <label for="accurate">Use 28.444 instead of 28 for hash distances</label>
+        
+        <button id="calculate">Go!</button>
+        
+        <p id="dotslist">
         </p>
         
-        <!-- ex. side 1: 0 in from 45 -->
-        <input type="text" placeholder="X steps" id="xsteps" />
-        <!-- ex. 0 behind FSL -->
-        <input type="text" placeholder="Y steps" id="ysteps" />
-        
-        <br/><br/>
-        
-        <input type="text" placeholder="X steps" id="xsteps2" />
-        <input type="text" placeholder="Y steps" id="ysteps2" />
-        <br/><br/>
-        <button id="calc-btn">Calculate</button>
-        <button id="next-btn">Next</button>
-        
-        <h3>Midset:</h3>
-        <p id="midset-x"></p>
-        <p id="midset-y"></p>
-
-        <br/>
-
-        <p id="hyp"></p>
-        <canvas id="triangle"></canvas>
-        
         <script type="text/javascript">
-            var calcBtn = document.getElementById("calc-btn");
-            var nextBtn = document.getElementById("next-btn");
+            var goBtn = document.getElementById("calculate");
+            var dotsList = document.getElementById("dotslist");
+            var dotNumber;
+            var accurate;
             
-            var canvas = document.getElementById("triangle");
-            var ctx = canvas.getContext("2d");
-
-            function drawTriangle(first, second) {
-                var diff = Dot.difference(second, first);
-
-                var scale = 10;
-                var offset = 30;
-
-                ctx.clearRect(0, 0, 500, 500);
-
-                var triangle = {
-                    y: offset + (Math.abs(diff.y) * scale),
-                    x: offset + (Math.abs(diff.x) * scale)
-                };
-
-                var path = new Path2D();
-
-                if (diff.x < 0) {
-                    if (diff.y < 0) {
-                        path.moveTo(offset, triangle.y); //Bottom left
-                        path.lineTo(triangle.x, offset); //Top right
-                    }
-
-                    if (diff.y > 0) {
-                        path.moveTo(offset, offset); //Top left
-                        path.lineTo(offset, triangle.y); //Bottom left
+            function rewriteXDots(xDots) {
+                for (var i = 0; i < xDots.length; i++) {
+                    xDots[i] = xDots[i].replace("side ", "S").replace(":", "").replace(" yd ln", "");
+                    if (xDots[i].indexOf("on ") != -1) {
+                        xDots[i] = xDots[i].replace("on ", "0I");
+                    } else {
+                        xDots[i] = xDots[i].replace("steps ", "").replace(" inside ", "I").replace(" outside ", "O");
                     }
                 }
-
-                if (diff.x > 0) {
-                    if (diff.y > 0) {
-                        path.moveTo(triangle.x, offset); //Top right
-                        path.lineTo(offset, triangle.y); //Bottom left
-                    }
-
-                    if (diff.y < 0) {
-                        path.moveTo(offset, offset); //Top left
-                        path.lineTo(triangle.x, offset); //Top right
-                    }
-                }
-
-                //Bottom right corner is in all possible triangles
-                path.lineTo(triangle.x, triangle.y);
-
-                ctx.fill(path);
-
-                ctx.textBaseline = "top";
-                ctx.font = "10px sans-serif";
-                ctx.fillText(diff.y, 0, 50);
-                ctx.fillText(diff.x, 75, 15);
-
-                document.getElementById("hyp").textContent = Math.sqrt(Math.pow(diff.x, 2) + Math.pow(diff.y, 2));
+                return xDots;
             }
-
-            calcBtn.onclick = function () {
-                var firstSet = parseDot(document.getElementById("xsteps").value, document.getElementById("ysteps").value);
-                var secondSet = parseDot(document.getElementById("xsteps2").value, document.getElementById("ysteps2").value);
-
-                var halfSet = Dot.average(firstSet, secondSet);
-                var prettyHalf = halfSet.prettify();
-                document.getElementById("midset-x").textContent = prettyHalf.x;
-                document.getElementById("midset-y").textContent = prettyHalf.y;
-                drawTriangle(firstSet, secondSet);
-            };
             
-            nextBtn.onclick = function () {
-                document.getElementById("xsteps").value = document.getElementById("xsteps2").value;
-                document.getElementById("ysteps").value = document.getElementById("ysteps2").value;
+            function rewriteYDots(yDots) {
+                for (var i = 0; i < yDots.length; i++) {
+                    if (yDots[i].indexOf("on ") != -1) {
+                        yDots[i] = yDots[i].replace("on ", "0IFO");
+                    } else {
+                        yDots[i] = yDots[i].replace(" steps in front of ", "IFO").replace(" steps behind ", "B")
+                                        .replace("front hash ", "FH").replace("back hash ", "BH")
+                                        .replace("back side line", "BSL").replace("front side line", "FSL");
+                    }
+                    yDots[i] = yDots[i].replace("(hs)", "");
+                }
+                return yDots;
+            }
+            
+            function doCalculation(xDots, yDots) {
+                xDots = rewriteXDots(xDots);
+                console.log(xDots);
+                yDots = rewriteYDots(yDots);
+                console.log(yDots);
+
+                dotsList.innerHTML = "";
+
+                for (var i = 0; i < xDots.length - 1; i++) {
+                    var firstSet = parseDot(xDots[i], yDots[i]);
+                    var secondSet = parseDot(xDots[i + 1], yDots[i + 1]);
+                    var halfSet = Dot.average(firstSet, secondSet);
+                    var prettyHalf = halfSet.prettify();
+                    
+                    var halt = (firstSet.x == secondSet.x && firstSet.y == secondSet.y) ? " (Halt)" : "";
+                    
+                    dotslist.innerHTML = dotsList.innerHTML + "Set " + i + ".5" + halt + ": " + prettyHalf.x + " and " + prettyHalf.y + "<br/>";
+                }
+            }
+            
+            goBtn.onclick = function () {
+                dotsList.innerHTML = "Loading...";
+                dotNumber = document.getElementById("dotnumber").value.replace(" ", "").toLowerCase();
+                accurate = document.getElementById("accurate").checked;
+                var finished = false;
                 
-                document.getElementById("xsteps2").value = "";
-                document.getElementById("ysteps2").value = "";
-            };
+                referencePoints = accurate ? accurateReferencePoints : inaccurateReferencePoints;
+                
+                PDFJS.getDocument('dots.pdf').then(function(pdf) {
+                    for (var i = 1; i <= pdf.numPages; i++) {
+                        if (finished) return;
+                        
+                        pdf.getPage(i).then(function(page) {
+                            if (finished) return;
+                            
+                            page.getTextContent().then(function (content) {
+                                if (finished) return;
+                                
+                                var xDots = [];
+                                var yDots = [];
+
+                                for (var c = 0; c < content.items.length; c++) {
+                                    var textContent = content.items[c].str.trim().toLowerCase();
+                                    if (textContent.indexOf("performer") == 0 && textContent.indexOf(" " + dotNumber) != -1) {
+                                        console.log("Found!");
+                                        doCalculation(xDots, yDots);
+                                        finished = true;
+                                        break;
+                                    } else if (textContent.indexOf("performer") == 0) {
+                                        xDots = [];
+                                        yDots = [];
+                                    }
+
+                                    if ((textContent.indexOf("side ") == 0 || textContent.indexOf("on 50") != -1)
+                                            && textContent.indexOf("side 1-side 2") == -1) {
+                                        xDots.push(textContent);
+                                    }
+                                    else if (textContent.indexOf("steps behind") != -1
+                                                || textContent.indexOf("steps in front") != -1
+                                                || textContent.indexOf("on back") != -1
+                                                || textContent.indexOf("on front") != -1) {
+                                        yDots.push(textContent);
+                                    }
+                                }
+                            });
+                        });
+                    }
+                });
+            }
         </script>
     </body>
 </html>

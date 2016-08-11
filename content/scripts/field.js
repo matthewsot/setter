@@ -1,11 +1,20 @@
 //Y reference points
 //going off of http://ostma.org/images/pdf-files/layout-high-school-football.pdf
 //steps/hash = ((53+(4/12))/3)*(8/5) = 256/9 or 28.44444...
-var referencePoints = {
+var referencePoints = null;
+
+var accurateReferencePoints = {
     "FSL": 0,
     "FH": 256 / 9,
     "BH": (256 / 9) * 2,
     "BSL": (256 / 9) * 3
+};
+
+var inaccurateReferencePoints = {
+    "FSL": 0,
+    "FH": 28,
+    "BH": (28) * 2,
+    "BSL": (28) * 3
 };
 
 function yardlineToSteps(side, yardline) {
@@ -38,7 +47,7 @@ Dot.prototype.getReferenceY = function () {
 Dot.prototype.prettify = function () {    
     var referenceY = this.getReferenceY();
     var y = this.y - referencePoints[referenceY];
-    var prettyY = Math.abs(y) + " steps " + (this.y < 0 ? "in front of" : "behind") + " the " + referenceY;
+    var prettyY = Math.abs(y) + " steps " + (y < 0 ? "in front of" : "behind") + " the " + referenceY;
     
     var referenceX = 0;
     var distanceFromX = 0;
@@ -60,7 +69,7 @@ Dot.prototype.prettify = function () {
     var yardLine = 50 - (referenceX * (5/8));
     
     var prettyX = "Side " + side + ": " + distanceFromX + " steps " + direction + " the " + yardLine;
-    
+    console.log(prettyY);
     return { x: prettyX, y: prettyY };
 };
 
@@ -80,7 +89,6 @@ var parseDot = function (x, y) {
 
     x = parseDot._parseX(x);
     y = parseDot._parseY(y);
-    console.log(y);
 
     //get the person's actual dot X coord
     if (x.side === 1) {
@@ -118,10 +126,9 @@ parseDot._parseX = function (x) {
     };
 };
 
-//(steps)(IFO/BH)(FH|FSL|etc)
+//(steps)(IFO/B)(FH|FSL|etc)
 parseDot._parseY = function (y) {
     var referenceLine = y.substring(y.match(/^(\d|\.)*(B|IFO)/)[0].length, y.length);
-    console.log(referenceLine);
 
     return {
         steps: parseFloat(y.match(/^(\d|\.)*/)),
