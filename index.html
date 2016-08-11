@@ -24,7 +24,7 @@
             
             function rewriteXDots(xDots) {
                 for (var i = 0; i < xDots.length; i++) {
-                    xDots[i] = xDots[i].replace("side ", "S").replace(":", "").replace(" yd ln", "");
+                    xDots[i] = xDots[i].replace("side ", "S").replace(":", "").replace(" yd ln", "").replace("on 50", "S1 0I50");
                     if (xDots[i].indexOf("on ") != -1) {
                         xDots[i] = xDots[i].replace("on ", "0I");
                     } else {
