@@ -83,7 +83,7 @@
                 
                 referencePoints = accurate ? accurateReferencePoints : inaccurateReferencePoints;
                 
-                PDFJS.getDocument('dots.pdf').then(function(pdf) {
+                PDFJS.getDocument('dots-latest.pdf').then(function(pdf) {
                     for (var i = 1; i <= pdf.numPages; i++) {
                         if (finished) return;
                         
