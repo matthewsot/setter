@@ -7,7 +7,7 @@
         <script type="text/javascript" src="pdfjs/build/pdf.worker.js"></script>
     </head>
     <body>
-        (Using part 2 dots updated as of 9/11/16)
+        (Using part 2 dots updated as of 9/23/16)
         <br /><br />
         <input type="text" id="dotnumber" placeholder="Dot Number (Bt4)" />
 	<br/><br/>
@@ -83,7 +83,7 @@
                 
                 referencePoints = accurate ? accurateReferencePoints : inaccurateReferencePoints;
                 
-                PDFJS.getDocument('dots.pdf').then(function(pdf) {
+                PDFJS.getDocument('dots2.pdf').then(function(pdf) {
                     for (var i = 1; i <= pdf.numPages; i++) {
                         if (finished) return;
                         
